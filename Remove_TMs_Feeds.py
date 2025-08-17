@@ -8,12 +8,12 @@ import os
 # Danh sách từ khóa bị cấm (blacklist)
 # Việc kiểm tra không phân biệt chữ hoa chữ thường.
 BLACKLIST_KEYWORDS = [
-    "Whyitsme", "Cottagecore", "Trump", "Biden", "Reggae", "Smoke Daddy", "Celtic Cross", "Bob Marley", "Family Guy", "Gay Cat", "Gay Trash", "Jockey", "Fishy", "Venom", "Boba", "BSN", "Uterus", "Van Gogh",
-    "CARHARTT", "Nonni", "Kangaroo", "Tuxedo", "Dibble", "Dabble", "Oh ship", "comica", "COHIBA", "Jurassic", "Jeep", "Jeeps", "Adventure Before Dementia", "antisocial", "anti social", "Cobra", "Python",
+    "Whyitsme", "Cottagecore", "Trump", "Biden", "Reggae", "Smoke Daddy", "Celtic Cross", "Bob Marley", "Family Guy", "Gay Cat", "Gay Trash", "Fishy", "Venom", "Boba", "BSN", "Uterus", "Van Gogh",
+    "CARHARTT", "Nonni", "Kangaroo", "Tuxedo", "Dibble", "Dabble", "Oh ship", "COHIBA", "Jurassic", "Jeep", "Jeeps", "Adventure Before Dementia", "antisocial", "anti social", "Cobra", "Python",
     "Spirit Halloween", "Got Titties", "Le Tits Now", "Mack Trucks", "V-buck", "V buck", "Vbuck", "World Traveler", "Rollerblade", "Black Lives Matter", "Just The Tip", "In My Defense", "Van Gogh",
     "U.S.Army", "US Army", "Crazy Chicken Lady", "Christmas In July", "Grill Sergeant", "Ducks Unlimited", "SOTALLY Tober", "Birds aren't Real", "Pickleballer", "Quaker", "Vampire Mansion",
     "Lampoon's", "Lampoons", "Lampoon", "krampus", "griswold", "Brainrot", "Disney", "Marvel", "Star Wars", "Music Television", "MTV", "Fender", "Nightmare Before Christmas", "Life is Good",
-    "WWE", "NFL", "NBA", "Robux", "ASPCA",
+    "WWE", "NFL", "NBA", "Robux", "ASPCA", "Alpha Wolf",
 ]
 
 # Từ điển các từ khóa cần thay thế
@@ -21,6 +21,8 @@ BLACKLIST_KEYWORDS = [
 REPLACEMENT_KEYWORDS = {
     "Guess": "Funny",
     "Rubiks": "Cube",
+    "Jockey": "Funny",
+    "comica": "Funny",
     "Sakura": "Flower",
     "Superhero": "Heroes",
     "Yeti": "Bigfoot",
