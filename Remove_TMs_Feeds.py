@@ -10,10 +10,10 @@ import os
 BLACKLIST_KEYWORDS = [
     "Whyitsme", "Cottagecore", "Trump", "Biden", "Reggae", "Smoke Daddy", "Celtic Cross", "Bob Marley", "Family Guy", "Gay Cat", "Gay Trash", "Fishy", "Venom", "Boba", "BSN", "Uterus", "Van Gogh",
     "CARHARTT", "Nonni", "Kangaroo", "Tuxedo", "Dibble", "Dabble", "Oh ship", "COHIBA", "Jurassic", "Jeep", "Jeeps", "Adventure Before Dementia", "antisocial", "anti social", "Cobra", "Python",
-    "Spirit Halloween", "Got Titties", "Le Tits Now", "Mack Trucks", "V-buck", "V buck", "Vbuck", "World Traveler", "Rollerblade", "Black Lives Matter", "Just The Tip", "In My Defense", "Van Gogh",
+    "Spirit Halloween", "Got Titties", "Le Tits Now", "Mack Trucks", "V-buck", "V buck", "Vbuck", "World Traveler", "Rollerblade", "Black Lives Matter", "Just The Tip", "In My Defense", "Sleep Token",
     "U.S.Army", "US Army", "Crazy Chicken Lady", "Christmas In July", "Grill Sergeant", "Ducks Unlimited", "SOTALLY Tober", "Birds aren't Real", "Pickleballer", "Quaker", "Vampire Mansion",
     "Lampoon's", "Lampoons", "Lampoon", "krampus", "griswold", "Brainrot", "Disney", "Marvel", "Star Wars", "Music Television", "MTV", "Fender", "Nightmare Before Christmas", "Life is Good",
-    "WWE", "NFL", "NBA", "Robux", "ASPCA", "Alpha Wolf",
+    "WWE", "NFL", "NBA", "Robux", "ASPCA", "Alpha Wolf", "Milkshake", "milk_shake", "Costume Agent",
 ]
 
 # Từ điển các từ khóa cần thay thế
@@ -61,18 +61,19 @@ COLUMNS_TO_CHECK = [
 # FUNCTIONS
 # ====================================================================
 
-def contains_blacklist_keyword(text, blacklist):
+def contains_blacklist_keyword_with_info(text, blacklist):
     """
-    Kiểm tra xem một chuỗi có chứa bất kỳ từ khóa nào trong blacklist không.
+    Kiểm tra xem một chuỗi có chứa bất kỳ từ khóa nào trong blacklist không
+    và trả về từ khóa đầu tiên tìm thấy.
     """
     if pd.isna(text):
-        return False
+        return None
     
     text_lower = str(text).lower()
     for keyword in blacklist:
         if re.search(r'\b' + re.escape(keyword.lower()) + r'\b', text_lower):
-            return True
-    return False
+            return keyword
+    return None
 
 def replace_keywords(text, replacements):
     """
@@ -96,31 +97,57 @@ def process_excel_file(input_filename):
     output_filename = os.path.splitext(input_filename)[0] + "_processed.xlsx"
 
     try:
-        # Đọc toàn bộ file Excel mà không chỉ định hàng header
         print(f"Đang đọc file: {input_filename}...")
         full_df = pd.read_excel(input_filename, header=None)
         
-        # Tách 3 hàng header đầu tiên
         header_rows = full_df.iloc[:3]
         
-        # Tách phần dữ liệu và gán tên cột từ hàng thứ 3 (chỉ mục 2)
         df_data = full_df.iloc[3:].copy()
         df_data.columns = full_df.iloc[2].tolist()
+        df_data.index = range(len(df_data))
         
         initial_rows = len(df_data)
         print(f"Tổng số hàng dữ liệu ban đầu: {initial_rows}")
 
-        # Bước 1: Xóa các hàng chứa từ khóa blacklist
-        rows_to_delete = df_data.apply(
-            lambda row: any(contains_blacklist_keyword(row[col], BLACKLIST_KEYWORDS) for col in COLUMNS_TO_CHECK if col in row),
-            axis=1
-        )
-        df_cleaned = df_data[~rows_to_delete].copy()
-        
-        deleted_rows = initial_rows - len(df_cleaned)
-        print(f"Đã xóa {deleted_rows} hàng chứa từ khóa blacklist.")
+        # Bước 1: Xóa các hàng chứa từ khóa blacklist và ghi log
+        rows_to_delete = []
+        deleted_log = []
 
-        # Bước 2: Thay thế các từ khóa
+        for index, row in df_data.iterrows():
+            row_deleted = False
+            for col in COLUMNS_TO_CHECK:
+                if col in row:
+                    found_keyword = contains_blacklist_keyword_with_info(row[col], BLACKLIST_KEYWORDS)
+                    if found_keyword:
+                        # Ghi log chi tiết
+                        original_row_number = index + 4
+                        deleted_log.append({
+                            "Hàng": original_row_number,
+                            "Từ khóa bị cấm": found_keyword,
+                            "Cột": col
+                        })
+                        rows_to_delete.append(index)
+                        row_deleted = True
+                        break # Chuyển sang hàng tiếp theo nếu đã tìm thấy từ khóa
+            
+        df_cleaned = df_data.drop(rows_to_delete)
+        
+        deleted_count = len(rows_to_delete)
+        print(f"----------------------------------------------------")
+        print(f"TÓM TẮT XỬ LÝ")
+        print(f"Tổng số hàng dữ liệu ban đầu: {initial_rows}")
+        print(f"Tổng số hàng bị xóa: {deleted_count}")
+        
+        if deleted_count > 0:
+            print(f"\nCHI TIẾT CÁC HÀNG BỊ XÓA:")
+            for log_entry in deleted_log:
+                print(f"- Hàng {log_entry['Hàng']}: Bị xóa vì từ khóa '{log_entry['Từ khóa bị cấm']}' trong cột '{log_entry['Cột']}'")
+        else:
+            print(f"Không có hàng nào bị xóa do chứa từ khóa blacklist.")
+        
+        print(f"----------------------------------------------------")
+
+        # Bước 2: Thay thế các từ khóa trên dữ liệu đã được làm sạch
         for column in COLUMNS_TO_CHECK:
             if column in df_cleaned.columns:
                 print(f"Đang thay thế từ khóa trong cột '{column}'...")
@@ -134,11 +161,10 @@ def process_excel_file(input_filename):
             header_rows.to_excel(writer, index=False, header=False, sheet_name='Sheet1')
             
             # Ghi dữ liệu đã được xử lý vào sau 3 hàng header
-            # header=False để không ghi lại tên cột, startrow=3 để bắt đầu từ hàng thứ 4
             df_cleaned.to_excel(writer, index=False, header=False, sheet_name='Sheet1', startrow=3)
 
         final_rows = len(df_cleaned)
-        print(f"Tổng số hàng dữ liệu sau khi xử lý: {final_rows}")
+        print(f"\nTổng số hàng dữ liệu sau khi xử lý: {final_rows}")
         print(f"Đã lưu kết quả vào file: {output_filename}")
 
     except FileNotFoundError:
