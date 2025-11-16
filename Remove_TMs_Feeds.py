@@ -45,6 +45,12 @@ REPLACEMENT_KEYWORDS = {
     "Akita": "Dog",
     "Lucky Charms": "Lucky Gifts",
     "Little Trees": "Trees Lover",
+    "Fallout": "Radiation",
+    "Fuck": "Fck",
+    "Halls": "Holidays",
+    "Mr. Christmas": "Couple Christmas",
+    "Mr Christmas": "Couple Christmas",
+    "Busch": "Funny",
 }
 
 # Tên các cột cần kiểm tra trong file Excel
